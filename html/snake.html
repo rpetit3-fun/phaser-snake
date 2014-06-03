@@ -1,0 +1,119 @@
+<!doctype html> 
+<html lang="en"> 
+<head> 
+	<meta charset="UTF-8" />
+	<title>Phaser - Snake</title>
+	<script type="text/javascript" src="js/phaser.min.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+<script type="text/javascript">
+
+var game = new Phaser.Game(800, 800, Phaser.AUTO, '', { preload: preload, create: create, update: update });
+var snake;
+var snake_body = new Array(); 
+var snake_path = new Array();
+var snake_space = 1;
+var score = 0
+var stars;
+var cursors;
+
+function spawn_star() {
+    min = 1;
+    max = 770;
+    x = Math.floor(Math.random() * ((max-min)+1) + min);
+    y = Math.floor(Math.random() * ((max-min)+1) + min);
+    
+    var star = stars.create(x, y, 'star');
+}
+
+function grow_snake() {
+    snake_body[score] = game.add.sprite(snake.x, snake.y, 'snake');
+    snake_body[score].anchor.setTo(0.5, 0.5);
+    j = score*snake_space
+    for (var i = j; i <= j + snake_space; i++) {
+        snake_path[i] = new Phaser.Point(snake.x, snake.y);
+    }
+}
+
+function collect_star(snake, star) {
+    // Remove star and spawn another
+    star.kill()
+    spawn_star();
+    
+    for (var i = 1; i <= 7; i++ ) {
+        score += 1;
+        grow_snake();
+    }
+}
+
+function preload() {
+    game.load.image('snake', 'assets/snake.png');
+    game.load.image('star', 'assets/star.png');
+}
+
+function create() {
+    // Set the background color
+    game.stage.backgroundColor = '#00FFFF';
+    
+    // Let there be physics!
+    game.physics.startSystem(Phaser.Physics.ARCADE);
+    
+    // Create Snake
+    snake = game.add.sprite(400, 400, 'snake');
+    snake.anchor.setTo(0.5, 0.5);
+    game.physics.arcade.enable(snake);
+    snake.body.collideWorldBounds = true;
+    
+    // Init snake_path
+    for (var i = 0; i <= snake_space; i++) {
+        snake_path[i] = new Phaser.Point(snake.x, snake.y);
+    }
+    
+    //Spawn star
+    stars = game.add.group()
+    stars.enableBody = true;
+    spawn_star();
+    
+    cursors = game.input.keyboard.createCursorKeys();
+}
+
+function update() {
+    game.physics.arcade.overlap(snake, stars, collect_star, null, this);
+    
+    if (snake_path.length > 0) {
+        var part = snake_path.pop();
+        part.setTo(snake.x, snake.y);
+        snake_path.unshift(part);
+
+        for (var i = 1; i <= score; i++)
+        {
+            snake_body[i].x = (snake_path[i * snake_space]).x;
+            snake_body[i].y = (snake_path[i * snake_space]).y;
+        }
+    }
+    
+    if (cursors.left.isDown) {
+        snake.body.velocity.x = -150;
+        snake.body.velocity.y = 0;
+    } else if (cursors.right.isDown) {
+        snake.body.velocity.x = 150;
+        snake.body.velocity.y = 0;
+    } else if (cursors.up.isDown) {
+        snake.body.velocity.y = -150;
+        snake.body.velocity.x = 0;
+    } else if (cursors.down.isDown) {
+        snake.body.velocity.y = 150;
+        snake.body.velocity.x = 0;
+    } 
+}
+
+</script>
+
+</body>
+</html>
