@@ -7,6 +7,7 @@ var score = 0
 var star;
 var cursors;
 var game_over;
+var scoreText;
 
 function spawn_star() {
     min = 1;
@@ -44,6 +45,7 @@ function collect_star(snake, star) {
         score += 1;
         grow_snake();
     }
+    scoreText.text = 'Score: ' + score/10;
 }
 
 function kill_snake() {
@@ -57,6 +59,7 @@ function restart() {
     spawn_star();
     game_running = true;
     score = 0;
+    scoreText.text = 'Score: 0';
 }
 
 function preload() {
@@ -97,6 +100,9 @@ function create() {
     game_over.anchor.setTo(0.5, 0.5);
     game_over.inputEnabled = true;
     game_over.events.onInputDown.add(restart, this);
+    
+    //  The score
+    scoreText = game.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#000' });
 }
 
 function update() {
